@@ -8,7 +8,8 @@ from util import (
     percent_to_dmx,
     tilt_to_dmx,
 )
-from enttec_usb_dmx_pro import EnttecUsbDmxPro
+
+from dmx import Dmx
 
 CHANNEL_MASTER_CONTROL = 4
 MASTER_LAMP_OFF = 100
@@ -43,7 +44,7 @@ class Lighthouse(object):
     def __init__(self):
         self.brightness = 0
 
-        self.dmx = EnttecUsbDmxPro.EnttecUsbDmxPro()
+        self.dmx = Dmx() #EnttecUsbDmxPro.EnttecUsbDmxPro()
         self.port = get_default_port()
         self.dmx.setPort(self.port, baud=250000)
         self.dmx.connect()
