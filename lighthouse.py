@@ -104,33 +104,3 @@ class Lighthouse(object):
     def set_strobe(self, strobe_percent):
         self.dmx.setChannel(CHANNEL_STROBE, percent_to_dmx(strobe_percent), autoRender=False)
         self.dmx.render()
-
-    def foo(self):
-        self.dmx.setChannel(1, 255)
-        self.dmx.setChannel(3, 255)
-        self.dmx.setChannel(4, 255)
-        self.dmx.setChannel(5, 255)
-        self.dmx.render()
-
-    def bar(self):
-        self.dmx.setChannel(1, 0)
-        self.dmx.setChannel(3, 0)
-        self.dmx.setChannel(4, 0)
-        self.dmx.setChannel(5, 0)
-        self.dmx.render()
-
-
-class Lumin_Slick_Par(object):
-    def foo(self):
-        self.dmx.setChannel(1, 255)
-        self.dmx.setChannel(3, 255)
-        self.dmx.setChannel(4, 255)
-        self.dmx.setChannel(5, 255)
-        self.dmx.render()
-
-    def bar(self):
-        self.dmx.setChannel(1, 0)
-        self.dmx.setChannel(3, 0)
-        self.dmx.setChannel(4, 0)
-        self.dmx.setChannel(5, 0)
-        self.dmx.render()
