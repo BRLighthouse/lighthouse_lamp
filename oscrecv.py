@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 
 # stdlib
+import platform
 import types
 
 # dependent libraries
@@ -78,6 +79,17 @@ class LighthouseMotion(ServerLighthouse):
         self.handle_event(address, self.light.set_strobe)
 
 if __name__ == "__main__":
+
+    # Cribbed from https://github.com/ArdentHeavyIndustries/amcp-rpi/blob/master/server.py
+    if platform.system() == "Darwin":
+        service = None
+    else:
+        # Avahi announce so it's findable on the controller by name
+        from avahi_announce import ZeroconfService
+        service = ZeroconfService(
+            name="BRLS TouchOSC Server", port=8000, stype="_osc._udp")
+        service.publish()
+
     light = LighthouseMotion()
     light.pan_light('/1/pan')
     light.tilt_light('/1/tilt')

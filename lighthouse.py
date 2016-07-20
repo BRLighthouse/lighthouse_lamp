@@ -1,6 +1,5 @@
 import time
 
-#import util
 from util import (
     brightness_percent_to_dmx,
     degrees_to_dmx,
