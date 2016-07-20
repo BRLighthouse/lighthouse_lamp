@@ -12,7 +12,7 @@ from OSC import OSCServer
 import lighthouse
 import util
 
-recv_port = 7000
+recv_port = 8000
 
 
 class ServerLighthouse(object):
