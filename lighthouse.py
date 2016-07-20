@@ -37,7 +37,6 @@ TILT_VERTICAL_DEGREES = 0
 CHANNEL_STROBE = 7
 STROBE_MIN = 25
 
-
 class Lighthouse(object):
 
     def __init__(self):
@@ -71,12 +70,11 @@ class Lighthouse(object):
 
     def set_pan_position(self, position_degrees):
         """
-            Moves lamp to a specific rotation
+            Moves lamp to a specific position
             TODO - Add in don't-burn-down-lighthouse safeguard
         """
         self.dmx.setChannel(CHANNEL_PAN_LOCATION, degrees_to_dmx(position_degrees), autoRender=False)
         self.dmx.render()
-        # self.dmx.setChannel(1, 255)
 
     def set_rotation(self, clockwise, speed=100):
         """
@@ -94,13 +92,25 @@ class Lighthouse(object):
         self.dmx.render()
 
     def set_tilt(self, tilt_degrees):
+        """
+            Set the lamp's tilt, in degrees.
+
+            0 is horizontal, 90 is vertical, 90+ is rotation in the other direction.
+            The lowest it can go is -30 degrees.
+        """
         self.dmx.setChannel(CHANNEL_TILT, tilt_to_dmx(tilt_degrees), autoRender=False)
         self.dmx.render()
 
     def set_speed(self, speed_percent):
+        """
+            Set the speed in percent of dmx, range untested on actual lamp
+        """
         self.dmx.setChannel(CHANNEL_SPEED, percent_to_dmx(speed_percent), autoRender=False)
         self.dmx.render()
 
     def set_strobe(self, strobe_percent):
+        """
+            Set the strobe percent of dmx, untested on actual lamp
+        """
         self.dmx.setChannel(CHANNEL_STROBE, percent_to_dmx(strobe_percent), autoRender=False)
         self.dmx.render()
