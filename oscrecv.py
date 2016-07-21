@@ -1,24 +1,27 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
+"""
+oscrecv.py
 
-# stdlib
-import platform
+Run an OSCServer to control the lamp from touchOSC.
+"""
 import types
-
-# dependent libraries
+import platform
 from OSC import OSCServer
 
 # Local libraries
 import lighthouse
+import util
 
 recv_port = 7000
 
+
 class ServerLighthouse(object):
 
-    def __init__(self, address='192.168.1.145', recv_port=recv_port):
-
+    def __init__(self, address=None, recvPort=recv_port):
+        if address is None:
+            address = util.get_ip()[0]  # Just use first detected address.
         self.address = address
         self.recv_port = recv_port
-
         self.timed_out = False
 
         # Setup a reciever for OSC.
@@ -45,6 +48,7 @@ class ServerLighthouse(object):
             arg = int(args[0])
             function(arg)
         self.server.addMsgHandler(address, internal_function)
+
 
 class LighthouseMotion(ServerLighthouse):
 
