@@ -29,9 +29,6 @@ class ServerLighthouse(object):
         self.server.timeout = 0
         self.server.handle_timeout = types.MethodType(ServerLighthouse.handle_timeout, self)
 
-        # Startup light
-        self.intitialize_light()
-
     def handle_timeout(self):
         self.timed_out = True
 
@@ -54,6 +51,9 @@ class LighthouseMotion(ServerLighthouse):
 
     def __init__(self):
         super(LighthouseMotion, self).__init__()
+
+        # Startup light
+        self.intitialize_light()
 
     def intitialize_light(self):
         # Allow lamp to move at 25% speed.
