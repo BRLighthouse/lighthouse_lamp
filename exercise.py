@@ -30,8 +30,3 @@ finally:
     l.set_lamp(0)
     time.sleep(1)
     l.dmx.disconnect()
-
-# Trying some more stuff
-print('What is going on here?')
-# Hello
-# Word what is going on here?
