@@ -31,4 +31,7 @@ finally:
     time.sleep(1)
     l.dmx.disconnect()
 
-# gerald is testing a thing
+# Trying some more stuff
+print('What is going on here?')
+ 
+
