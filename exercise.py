@@ -30,3 +30,5 @@ finally:
     l.set_lamp(0)
     time.sleep(1)
     l.dmx.disconnect()
+
+# gerald is testing a thing
