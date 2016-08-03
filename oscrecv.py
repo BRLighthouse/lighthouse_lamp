@@ -40,10 +40,21 @@ class ServerLighthouse(object):
         while not self.server.timed_out:
             self.server.handle_request()
 
-    def handle_event(self, address, function):
+    def handle_event(self, address, function, singleArg=True):
         def internal_function(path, tags, args, source):
-            arg = int(args[0])
+            args = [int(arg) for arg in args]
+            if singleArg:
+                function(args[0])
+            else:
+                function(args)
+        self.server.addMsgHandler(address, internal_function)
+
+    def handle_touch(self, address, function):
+        def internal_function(path, tags, args, source):
+            arg = [int(arg) for arg in args]
             function(arg)
+
+        address += '/z'
         self.server.addMsgHandler(address, internal_function)
 
 
@@ -59,7 +70,7 @@ class LighthouseMotion(ServerLighthouse):
         # Allow lamp to move at 25% speed.
 
         self.light = lighthouse.Lighthouse()
-        self.light.set_speed(25)  # set speed to quarter AKA Rabtule (rabbit turtle)
+        self.light.set_speed(25)  # set speed to quarter AKA Rabtule (rabbit turtle)'
 
     def pan_light(self, address):
         self.handle_event(address, self.light.set_pan_position)
@@ -82,6 +93,20 @@ class LighthouseMotion(ServerLighthouse):
     def set_strobe(self, address):
         self.handle_event(address, self.light.set_strobe)
 
+    def printFunc(self, message):
+        print(message)
+
+    def printAthing(self, address):
+        self.handle_event(address, self.printFunc, singleArg=False)
+
+
+def controlLight(address):
+    return '/controlLight/' + address
+
+
+def lightStates(address):
+    return '/lightStates' + address
+
 if __name__ == "__main__":
 
     # Cribbed from https://github.com/ArdentHeavyIndustries/amcp-rpi/blob/master/server.py
@@ -95,11 +120,12 @@ if __name__ == "__main__":
         service.publish()
 
     light = LighthouseMotion()
-    light.pan_light('/1/pan')
-    light.tilt_light('/1/tilt')
-    light.set_speed('/1/speed')
-    light.light_on_off('/1/lightcontrol')
-    light.set_brightness('/1/brightness')
-    light.set_strobe('/1/strobe')
+    light.pan_light('/staticLight/pan')
+    light.tilt_light('/staticLight/tilt')
+    light.set_speed('/staticLight/speed')
+    light.light_on_off('/staticLight/lightControl')
+    light.set_brightness('/staticLight/brightness')
+    light.set_strobe('/staticLight/strobe')
+    light.printAthing('/dynamicLight/xy1')
     while True:
         light.each_frame()
