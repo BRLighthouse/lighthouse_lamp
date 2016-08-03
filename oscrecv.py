@@ -27,7 +27,8 @@ class ServerLighthouse(object):
         # Setup a reciever for OSC.
         self.server = OSCServer((self.address, self.recv_port))
         self.server.timeout = False
-        def handle_timeout(self):
+        
+    def handle_timeout(self):
             self.timed_out = True
         self.server.handle_timeout = types.MethodType(handle_timeout, self.server)
 
@@ -102,14 +103,6 @@ class LighthouseMotion(ServerLighthouse):
 
     def printAthing(self, address):
         self.handle_event(address, self.printFunc, singleArg=False)
-
-
-def controlLight(address):
-    return '/controlLight/' + address
-
-
-def lightStates(address):
-    return '/lightStates' + address
 
 if __name__ == "__main__":
 
