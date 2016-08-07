@@ -60,7 +60,7 @@ class ServerLighthouse(object):
         for a touch event can also be passed in as well.
         """
         def internal_function(path, tags, args, source):
-            args = tuple([int(arg) for arg in args])
+            args = [int(arg) for arg in args]
             function(*args)
 
         self.server.addMsgHandler(address, internal_function)
