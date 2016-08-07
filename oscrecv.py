@@ -14,6 +14,9 @@ import util
 
 recv_port = 8000
 
+class LighthouseOSCServer(OSCServer):
+    def handle_timeout(self):
+        self.timed_out = True
 
 class ServerLighthouse(object):
 
@@ -26,15 +29,6 @@ class ServerLighthouse(object):
 
         # Setup a reciever for OSC.
         self.server = OSCServer((self.address, self.recv_port))
-        self.server.timeout = False
-        def handle_timeout(self):
-            self.timed_out = True
-        self.server.handle_timeout = types.MethodType(handle_timeout, self.server)
-
-    def handle_timeout(self):
-        self.timed_out = True
-        # Startup light
-        self.intitialize_light()
 
     def each_frame(self):
         # clear timed_out flag
