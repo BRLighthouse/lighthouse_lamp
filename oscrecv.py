@@ -16,6 +16,11 @@ recv_port = 8000
 
 
 class ServerLighthouse(object):
+    """
+    OSCServer for lighthouse.
+
+    Turns OSC messages into reality functions.
+    """
 
     def __init__(self, address=None, recvPort=recv_port):
         if address is None:
@@ -27,37 +32,52 @@ class ServerLighthouse(object):
         # Setup a reciever for OSC.
         self.server = OSCServer((self.address, self.recv_port))
         self.server.timeout = False
-        
-    def handle_timeout(self):
+
+        def handle_timeout(self):
             self.timed_out = True
         self.server.handle_timeout = types.MethodType(handle_timeout, self.server)
 
     def handle_timeout(self):
         self.timed_out = True
+
         # Startup light
         self.intitialize_light()
 
     def each_frame(self):
-        # clear timed_out flag
-        self.server.timed_out = False
+        """Used to continuously call the OSCServer."""
+        self.server.timed_out = False  # clear timed_out flag
 
         # handle all pending requests then return
         while not self.server.timed_out:
             self.server.handle_request()
 
-    def handle_event(self, address, function, singleArg=True):
+    def handle_event(self, address, function, touchFunction=None):
+        """
+        Whenever an OSCMessage is passed from the Client to the Server, do a thing with it.
+
+        The internal function is used by the MsgHandler to take all arguments from the source,
+        parse them into integers and pass them off to the desired function.
+        """
         def internal_function(path, tags, args, source):
-            args = [int(arg) for arg in args]
-            if singleArg:
-                function(args[0])
-            else:
-                function(args)
+            args = tuple([int(arg) for arg in args])
+            function(*args)
+
         self.server.addMsgHandler(address, internal_function)
+        self.handle_touch(address, touchFunction)
 
     def handle_touch(self, address, function):
-        def internal_function(path, tags, args, source):
-            arg = [int(arg) for arg in args]
-            function(arg)
+        """
+        Handle a touch event from TouchOSC.
+
+        If none is passed in as the function make a blank handler, this was mainly for my sainty.
+        """
+        if function:
+            def internal_function(path, tags, args, source):
+                arg = [int(arg) for arg in args]
+                function(arg)
+        else:
+            def internal_function(*args):
+                pass
 
         address += '/z'
         self.server.addMsgHandler(address, internal_function)
@@ -98,11 +118,12 @@ class LighthouseMotion(ServerLighthouse):
     def set_strobe(self, address):
         self.handle_event(address, self.light.set_strobe)
 
-    def printFunc(self, message):
-        print(message)
+    def printFunc(self, message1, message2):
+        print(message1)
+        print(message2)
 
-    def printAthing(self, address):
-        self.handle_event(address, self.printFunc, singleArg=False)
+    # def printAthing(self, address):
+    #     self.handle_eventMulti(address, self.printFunc)
 
 if __name__ == "__main__":
 
@@ -123,6 +144,9 @@ if __name__ == "__main__":
     light.light_on_off('/staticLight/lightControl')
     light.set_brightness('/staticLight/brightness')
     light.set_strobe('/staticLight/strobe')
-    light.printAthing('/dynamicLight/xy1')
+    # light.printAthing('/dynamicLight/xy1')
     while True:
-        light.each_frame()
+        try:
+            light.each_frame()
+        except(KeyboardInterrupt):
+            light.server.close()
