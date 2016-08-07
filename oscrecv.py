@@ -56,7 +56,8 @@ class ServerLighthouse(object):
         Whenever an OSCMessage is passed from the Client to the Server, do a thing with it.
 
         The internal function is used by the MsgHandler to take all arguments from the source,
-        parse them into integers and pass them off to the desired function.
+        parse them into integers and pass them off to the desired function. The appropriate function
+        for a touch event can also be passed in as well.
         """
         def internal_function(path, tags, args, source):
             args = tuple([int(arg) for arg in args])
