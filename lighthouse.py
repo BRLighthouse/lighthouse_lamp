@@ -114,3 +114,13 @@ class Lighthouse(object):
         """
         self.dmx.setChannel(CHANNEL_STROBE, percent_to_dmx(strobe_percent), autoRender=False)
         self.dmx.render()
+
+    def shutdown_light(self):
+        """
+            It is important to stop the light, turn off the lamp and disconnect.
+        """
+        self.set_rotation(True, speed=0)
+        time.sleep(1)
+        self.set_lamp(0)
+        time.sleep(1)
+        self.dmx.disconnect()
