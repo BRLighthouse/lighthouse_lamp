@@ -40,7 +40,7 @@ class ServerLighthouse(OSCServer):
 
     def __init__(self, address=None, recv_port=default_recv_port):
         if address is None:
-            address = util.get_ip()[0]  # Just use first detected address.
+            address = '0.0.0.0'
         OSCServer.__init__(self, (address, recv_port))
         print('Starting OSC Server at %s on port %s' % (address, recv_port))
 
