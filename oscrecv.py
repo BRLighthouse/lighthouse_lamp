@@ -41,8 +41,6 @@ class ServerLighthouse(OSCServer):
         print('Starting OSC Server at %s' % address)
         self.timed_out = False
 
-        self.timeout = False
-
     def handle_timeout(self):
         self.timed_out = True
 
