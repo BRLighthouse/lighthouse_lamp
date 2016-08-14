@@ -37,13 +37,16 @@ TILT_VERTICAL_DEGREES = 0
 CHANNEL_STROBE = 7
 STROBE_MIN = 25
 
-PostLocations = [0, 60, 120, 180, 240, 300, 360]
+PAN_DEAD_ZONE_LOCATIONS = [0, 60, 120, 180, 240, 300, 360]
 # 0 only goes from 0->deadzonesize so we include 360 to cover the half of the deadzone side
-DeadZoneSize = 10
-DeadZones = [(max(0,x-DeadZoneSize), min(360, x+DeadZoneSize)) for x in PostLocations]
+PAN_DEAD_ZONE_SIZE = 10
+PAN_DEAD_ZONES = [(max(0,x-PAN_DEAD_ZONE_SIZE), min(360, x+PAN_DEAD_ZONE_SIZE)) for x in PAN_DEAD_ZONE_LOCATIONS]
 
-def reposition_from_deadzone(position_degrees):
-    for lower_bound, upper_bound in DeadZones:
+TILT_LIMIT_LOW = -5
+TILT_LIMIT_HIGH = 70
+
+def reposition_from_pan_deadzone(position_degrees):
+    for lower_bound, upper_bound in PAN_DEAD_ZONES:
         if position_degrees < lower_bound:
             break
         if lower_bound <= position_degrees <= upper_bound:
@@ -52,6 +55,11 @@ def reposition_from_deadzone(position_degrees):
             else:
                 return True, upper_bound + 1
     return False, position_degrees
+
+def reposition_from_tilt_deadzone(tilt_degrees):
+    new_tilt_degrees = max(TILT_LIMIT_LOW, tilt_degrees)
+    new_tilt_degrees = min(TILT_LIMIT_HIGH, new_tilt_degrees)
+    return ((tilt_degrees != new_tilt_degrees), new_tilt_degrees)
 
 class Lighthouse(object):
 
@@ -90,7 +98,7 @@ class Lighthouse(object):
             Moves lamp to a specific position
             TODO - Add in don't-burn-down-lighthouse safeguard
         """
-        bad, new_position_degrees = reposition_from_deadzone(position_degrees)
+        bad, new_position_degrees = reposition_from_pan_deadzone(position_degrees)
         if bad:
             print 'Offsetting position requested to', new_position_degrees, 'from', position_degrees
             position_degrees = new_position_degrees
@@ -120,6 +128,10 @@ class Lighthouse(object):
             0 is horizontal, 90 is vertical, 90+ is rotation in the other direction.
             The lowest it can go is -30 degrees.
         """
+        bad, new_tilt_degrees = reposition_from_tilt_deadzone(tilt_degrees)
+        if bad:
+            print 'Tilt limit hit. Limiting from', tilt_degrees, 'to', new_tilt_degrees
+            tilt_degrees = new_tilt_degrees
         self.dmx.setChannel(CHANNEL_TILT, tilt_to_dmx(tilt_degrees), autoRender=False)
         self.dmx.render()
 
