@@ -160,8 +160,19 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
         if data:
             print 'IP requesting control:', sender,
             if self.enabled:
-                print 'access denied.'
-                msg.append(0, typehint='f')
+                if sender == self.enabled:
+                    # Already in control, but might have been issue on client side.
+                    print 'already in control.'
+                    msg.append(1, typehint='f')
+                else:
+                    # sender is not already in control. 2 cases: old controller still in control
+                    if self.enabled in self.pings.ping_dict:
+                        print 'saw ping from previous controller recently.'
+                        msg.append(0, typehint='f')
+                    else:
+                        print "haven't seen previous controller recently, transferring control."
+                        msg.append(1, typehint='f')
+                        self.enabled = sender
             else:
                 print 'access granted.'
                 msg.append(1, typehint='f')
