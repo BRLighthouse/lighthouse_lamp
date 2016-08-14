@@ -140,7 +140,7 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
 
         self.set_functions(light_func_dict)
         self.addMsgHandler('default', self.print_msg)
-        self.addMsgHandler('/staticLight/toggle', self.request_control)
+        self.addMsgHandler('/staticLight/lightControl', self.request_control)
 
         self.enabled = None
 
