@@ -121,7 +121,6 @@ class Lighthouse(object):
             It is important to stop the light, turn off the lamp and disconnect.
         """
         self.set_rotation(True, speed=0)
-        time.sleep(1)
         self.set_lamp(0)
-        time.sleep(1)
+        time.sleep(2)
         self.dmx.disconnect()
