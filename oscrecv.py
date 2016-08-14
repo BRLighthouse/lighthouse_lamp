@@ -131,9 +131,9 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
 
         self.set_functions(light_func_dict)
         self.addMsgHandler('default', self.print_msg)
-        self.addMsgHandler('/staticLight/toggle', self.blah)
+        self.addMsgHandler('/staticLight/toggle', self.request_control)
 
-        self.enabled = 0
+        self.enabled = None
 
     def print_msg(self, *args):
         print 'Unknown message: ', args
@@ -147,25 +147,38 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
         ServerLighthouse.close(self)
         OSCPingHandler.close(self)
 
-    def blah(self, address, data_types, data, sender):
-        print 'blah', address, data_types, data, sender
-
-        msg = OSC.OSCMessage('/staticLight/toggle')
-        if self.enabled:
-            self.enabled = 0
+    def request_control(self, path, data_types, raw_data, sender_port_tuple):
+        sender = sender_port_tuple[0]
+        if sender_port_tuple[0] == '127.0.0.1':
+            return_port = 4000
         else:
-            self.enabled = 1
-        msg.append(self.enabled, typehint='f')
+            return_port = 8000
+
+        data = int(raw_data[0])
+
+        msg = OSC.OSCMessage(path)
+        if data:
+            print 'IP requesting control:', sender,
+            if self.enabled:
+                print 'access denied.'
+                msg.append(0, typehint='f')
+            else:
+                print 'access granted.'
+                msg.append(1, typehint='f')
+                self.enabled = sender
+        else:
+            print 'IP releasing control:', sender,
+            if self.enabled == sender:
+                print sender, 'released control'
+                self.enabled = None
+            else:
+                print sender, "wasn't actually in control."
+            msg.append(0, typehint='f')
 
         client = OSC.OSCClient()
-        client.connect((sender[0], 8000))
+        client.connect((sender, return_port))
         client.send(msg)
-
-        #client = OSC.OSCClient(self)
-        #client.sendto(msg, (sender[0], 8000))
-
         client.close()
-        print 'sent'
 
 if __name__ == "__main__":
 
