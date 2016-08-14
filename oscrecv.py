@@ -105,19 +105,22 @@ class PingHandler(threading.Thread):
 
 class OSCPingHandler(object):
     def __init__(self):
-        self.addMsgHandler('/ping/', self.ping_handler)
-        self.addMsgHandler('/dynamicLight/xy1', self.ping_handler)
+        self.addMsgHandler('/ping/', self.osc_ping_handler)
+        self.addMsgHandler('/dynamicLight/xy1', self.osc_ping_handler)
 
         self.pings = PingHandler()
         self.pings.start()
 
-    def ping_handler(self, path, tags, args, message_source):
+    def add_ping(self, address):
+        self.pings.add_ping(address)
+
+    def osc_ping_handler(self, path, tags, args, message_source):
         """
             message_source looks like ('192.168.0.24', 47139)
             The port changes if the touchOSC app is relaunched so just use ip
         """
         address, port = message_source
-        self.pings.add_ping(address)
+        self.add_ping(address)
 
     def close(self):
         self.pings.die = True
@@ -125,6 +128,12 @@ class OSCPingHandler(object):
 
 class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
     def __init__(self, light_func_dict=None):
+        parent = self
+        class InterceptingRequestHandler(OSC.OSCRequestHandler):
+            def handle(self):
+                parent.add_ping(self.client_address[0])
+                return OSC.OSCRequestHandler.handle(self)
+        self.RequestHandlerClass = InterceptingRequestHandler
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
         OSCPingHandler.__init__(self)
