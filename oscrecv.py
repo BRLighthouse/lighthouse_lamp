@@ -55,7 +55,6 @@ class ServerLighthouse(OSC.ThreadingOSCServer):
         """
         def internal_function(path, tags, args, source):
             args = [int(arg) for arg in args]
-            print 'arg', arg
             function(*args)
 
         self.addMsgHandler(address, internal_function)
