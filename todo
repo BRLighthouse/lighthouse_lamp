@@ -1,14 +1,14 @@
 fixup github access on bb
 setup overlayroot on bb
-convert exercise.py to have some sort of server.py, flask or touchosc
 
 allow user controls
 must have:
   brightness
   speed
   tilt
+
 Might add
-  direction? G3: direction that the lamp is facing? Like point ENE kind of thing?
+  direction? Auto-rotate clockwise or counter-clockwise
   shutdown/reboot G3: for the enttec? Or lamp? 
   DONE strobe G3: added to play with osc and weird out max 
 
