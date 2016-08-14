@@ -23,7 +23,7 @@ def avahi_publisher(server):
         # Avahi announce so it's findable on the controller by name
         from avahi_announce import ZeroconfService
         service = ZeroconfService(
-            name="BRLS TouchOSC Server", port=server.recv_port, stype="_osc._udp")
+            name="BRLS TouchOSC Server", port=server.server_address[1], stype="_osc._udp")
         service.publish()
 
 
