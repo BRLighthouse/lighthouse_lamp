@@ -120,7 +120,7 @@ class OSCPingHandler(object):
         self.pings.die = True
         self.pings.join()
 
-class Lighthouse_OSC_callbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
+class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
     def __init__(self, light_func_dict=None):
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
@@ -149,7 +149,7 @@ if __name__ == "__main__":
         '/staticLight/strobe': 'set_strobe',
     }
 
-    light = Lighthouse_OSC_callbacks(lightFunctions)
+    light = LighthouseOSCCallbacks(lightFunctions)
     avahi_publisher(light)
 
     while True:
