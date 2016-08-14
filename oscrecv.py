@@ -11,6 +11,7 @@ import threading
 import time
 
 # Libraries
+import OSC
 from OSC import OSCServer
 
 # Local libraries
@@ -31,7 +32,7 @@ def avahi_publisher(server):
             name="BRLS TouchOSC Server", port=server.server_address[1], stype="_osc._udp")
         service.publish()
 
-class ServerLighthouse(OSCServer):
+class ServerLighthouse(OSC.ThreadingOSCServer):
     """
     OSCServer for lighthouse.
 
@@ -54,6 +55,7 @@ class ServerLighthouse(OSCServer):
         """
         def internal_function(path, tags, args, source):
             args = [int(arg) for arg in args]
+            print 'arg', arg
             function(*args)
 
         self.addMsgHandler(address, internal_function)
@@ -104,6 +106,7 @@ class PingHandler(threading.Thread):
 class OSCPingHandler(object):
     def __init__(self):
         self.addMsgHandler('/ping/', self.ping_handler)
+        self.addMsgHandler('/dynamicLight/xy1', self.ping_handler)
 
         self.pings = PingHandler()
         self.pings.start()
@@ -127,6 +130,13 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
         OSCPingHandler.__init__(self)
 
         self.set_functions(light_func_dict)
+        self.addMsgHandler('default', self.print_msg)
+        self.addMsgHandler('/staticLight/toggle', self.blah)
+
+        self.enabled = 0
+
+    def print_msg(self, *args):
+        print 'Unknown message: ', args
 
     def set_functions(self, funcDict):
         # Pass a dictionary of OSC addresses and function names as callback functions to the OSCServer.
@@ -137,6 +147,25 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
         ServerLighthouse.close(self)
         OSCPingHandler.close(self)
 
+    def blah(self, address, data_types, data, sender):
+        print 'blah', address, data_types, data, sender
+
+        msg = OSC.OSCMessage('/staticLight/toggle')
+        if self.enabled:
+            self.enabled = 0
+        else:
+            self.enabled = 1
+        msg.append(self.enabled, typehint='f')
+
+        client = OSC.OSCClient()
+        client.connect((sender[0], 8000))
+        client.send(msg)
+
+        #client = OSC.OSCClient(self)
+        #client.sendto(msg, (sender[0], 8000))
+
+        client.close()
+        print 'sent'
 
 if __name__ == "__main__":
 
@@ -146,7 +175,7 @@ if __name__ == "__main__":
         '/staticLight/speed': 'set_speed',
         '/staticLight/lightControl': 'set_lamp',
         '/staticLight/brightness': 'set_lamp',
-        '/staticLight/strobe': 'set_strobe',
+        #'/staticLight/strobe': 'blah',
     }
 
     light = LighthouseOSCCallbacks(lightFunctions)
