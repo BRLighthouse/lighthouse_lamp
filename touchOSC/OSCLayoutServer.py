@@ -29,7 +29,6 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-filename = 'amcp_template.touchosc'
 PORT = 9658
 
 def doit(filename):
@@ -59,7 +58,7 @@ def doit(filename):
     if platform.system() == 'Linux':
         from avahi_announce import ZeroconfService
         service = ZeroconfService(
-            name="AMCP", port=PORT, stype="_touchosceditor._tcp")
+            name="BRLS touchOSC layout", port=PORT, stype="_touchosceditor._tcp")
         service.publish()
     server_address = ('', PORT)
     httpd = BaseHTTPServer.HTTPServer(server_address, OSCRequestHandler)
@@ -70,5 +69,5 @@ def doit(filename):
             service.unpublish()
 
 if __name__ == '__main__':
-    filename = sys.argv[1] if len(sys.argv) == 2 else 'amcp_template.touchosc'
+    filename = sys.argv[1] if len(sys.argv) == 2 else 'mainLight.touchosc'
     doit(filename)
