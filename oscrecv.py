@@ -15,7 +15,7 @@ import util
 default_recv_port = 8000
 
 
-def avahi_publisher():
+def avahi_publisher(server):
     # Cribbed from https://github.com/ArdentHeavyIndustries/amcp-rpi/blob/master/server.py
     if platform.system() == "Darwin":
         service = None
@@ -23,7 +23,7 @@ def avahi_publisher():
         # Avahi announce so it's findable on the controller by name
         from avahi_announce import ZeroconfService
         service = ZeroconfService(
-            name="BRLS TouchOSC Server", port=8000, stype="_osc._udp")
+            name="BRLS TouchOSC Server", port=server.recv_port, stype="_osc._udp")
         service.publish()
 
 
@@ -96,8 +96,8 @@ if __name__ == "__main__":
         '/staticLight/strobe': 'set_strobe'
     }
 
-    avahi_publisher()
     light = Lighthouse_OSC_callbacks(lightFunctions)
+    avahi_publisher(light)
 
     while True:
         try:
