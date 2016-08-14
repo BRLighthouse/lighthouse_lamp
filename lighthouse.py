@@ -51,7 +51,7 @@ def reposition_from_pan_deadzone(position_degrees):
             break
         if lower_bound <= position_degrees <= upper_bound:
             if (position_degrees - lower_bound) < (upper_bound - position_degrees):
-                return True, lower_bound - 1
+                return True, max(lower_bound - 1, PAN_DEAD_ZONES[0][1]+1)
             else:
                 return True, upper_bound + 1
     return False, position_degrees
