@@ -39,18 +39,6 @@ class ServerLighthouse(OSCServer):
             address = util.get_ip()[0]  # Just use first detected address.
         OSCServer.__init__(self, (address, recv_port))
         print('Starting OSC Server at %s on port %s' % (address, recv_port))
-        self.timed_out = False
-
-    def handle_timeout(self):
-        self.timed_out = True
-
-    def each_frame(self):
-        """Used to continuously call the OSCServer."""
-        self.timed_out = False  # clear timed_out flag
-
-        # handle all pending requests then return
-        while not self.timed_out:
-            self.handle_request()
 
     def handle_event(self, address, function, touchFunction=None):
         """
@@ -84,7 +72,6 @@ class ServerLighthouse(OSCServer):
         address += '/z'
         self.addMsgHandler(address, internal_function)
 
-
 class Lighthouse_OSC_callbacks(Lighthouse, ServerLighthouse):
 
     def __init__(self, light_func_dict=None):
@@ -114,7 +101,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            light.each_frame()
+            light.serve_forever()
         except (KeyboardInterrupt):
             light.shutdown_light()
             light.close()
