@@ -93,7 +93,7 @@ if __name__ == "__main__":
         '/staticLight/speed': 'set_speed',
         '/staticLight/lightControl': 'set_lamp',
         '/staticLight/brightness': 'set_lamp',
-        '/staticLight/strobe': 'set_strobe'
+        '/staticLight/strobe': 'set_strobe',
     }
 
     light = Lighthouse_OSC_callbacks(lightFunctions)
