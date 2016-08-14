@@ -15,11 +15,16 @@ admin mode:
 
   override user (tablet?) control
 
+deadzones
+  DONE pan
+  DONE tilt
+
+default spinning mode after timeout
+
 Might add
   direction? Auto-rotate clockwise or counter-clockwise
   shutdown/reboot G3: for the enttec? Or lamp? 
 
-default spinning mode after timeout
 
 stretch goal: web gui thing w/ BRC map
 
