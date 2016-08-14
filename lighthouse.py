@@ -37,6 +37,22 @@ TILT_VERTICAL_DEGREES = 0
 CHANNEL_STROBE = 7
 STROBE_MIN = 25
 
+PostLocations = [0, 60, 120, 180, 240, 300, 360]
+# 0 only goes from 0->deadzonesize so we include 360 to cover the half of the deadzone side
+DeadZoneSize = 10
+DeadZones = [(max(0,x-DeadZoneSize), min(360, x+DeadZoneSize)) for x in PostLocations]
+
+def reposition_from_deadzone(position_degrees):
+    for lower_bound, upper_bound in DeadZones:
+        if position_degrees < lower_bound:
+            break
+        if lower_bound <= position_degrees <= upper_bound:
+            if (position_degrees - lower_bound) < (upper_bound - position_degrees):
+                return True, lower_bound - 1
+            else:
+                return True, upper_bound + 1
+    return False, position_degrees
+
 class Lighthouse(object):
 
     def __init__(self):
@@ -74,6 +90,11 @@ class Lighthouse(object):
             Moves lamp to a specific position
             TODO - Add in don't-burn-down-lighthouse safeguard
         """
+        bad, new_position_degrees = reposition_from_deadzone(position_degrees)
+        if bad:
+            print 'Offsetting position requested to', new_position_degrees, 'from', position_degrees
+            position_degrees = new_position_degrees
+
         self.dmx.setChannel(CHANNEL_PAN_LOCATION, degrees_to_dmx(position_degrees), autoRender=False)
         self.dmx.render()
 
