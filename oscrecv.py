@@ -12,7 +12,7 @@ from OSC import OSCServer
 from lighthouse import Lighthouse
 import util
 
-recv_port = 8000
+default_recv_port = 8000
 
 
 def avahi_publisher():
@@ -34,11 +34,11 @@ class ServerLighthouse(OSCServer):
     Turns OSC messages into reality functions.
     """
 
-    def __init__(self, address=None, recvPort=recv_port):
+    def __init__(self, address=None, recv_port=default_recv_port):
         if address is None:
             address = util.get_ip()[0]  # Just use first detected address.
         OSCServer.__init__(self, (address, recv_port))
-        print('Starting OSC Server at %s' % address)
+        print('Starting OSC Server at %s on port %s' % (address, recv_port))
         self.timed_out = False
 
     def handle_timeout(self):
