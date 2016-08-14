@@ -7,6 +7,7 @@ Run an OSCServer to control the lamp from touchOSC.
 # Stdlib
 import platform
 import sys
+import threading
 import time
 
 # Libraries
@@ -75,10 +76,37 @@ class ServerLighthouse(OSCServer):
         address += '/z'
         self.addMsgHandler(address, internal_function)
 
+class PingHandler(threading.Thread):
+
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.ping_dict = {}
+        self.die = False
+        self.sleep = 1
+
+    def run(self):
+        while not self.die:
+            self.check_pings()
+            time.sleep(self.sleep)
+
+    def check_pings(self):
+        gone_time = 61
+        now = time.time()
+        for k, v in self.ping_dict.items():
+            delta = now - v
+            if delta > gone_time:
+                print "ping - Haven't seen", address, "for", delta, "seconds, removing."
+                del self.ping_dict[k]
+
+    def add_ping(self, address):
+        self.ping_dict[address] = time.time()
+
 class OSCPingHandler(object):
     def __init__(self):
-        self.ping_dict = {}
         self.addMsgHandler('/ping/', self.ping_handler)
+
+        self.pings = PingHandler()
+        self.pings.start()
 
     def ping_handler(self, path, tags, args, message_source):
         """
@@ -86,9 +114,11 @@ class OSCPingHandler(object):
             The port changes if the touchOSC app is relaunched so just use ip
         """
         address, port = message_source
-        self.ping_dict[address] = time.time()
+        self.pings.add_ping(address)
 
-        print self.ping_dict
+    def close(self):
+        self.pings.die = True
+        self.pings.join()
 
 class Lighthouse_OSC_callbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
     def __init__(self, light_func_dict=None):
@@ -102,6 +132,10 @@ class Lighthouse_OSC_callbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
         # Pass a dictionary of OSC addresses and function names as callback functions to the OSCServer.
         for address, functionName in funcDict.iteritems():
             self.handle_event(address, getattr(self, functionName))
+
+    def close(self):
+        ServerLighthouse.close(self)
+        OSCPingHandler.close(self)
 
 
 if __name__ == "__main__":
@@ -123,5 +157,6 @@ if __name__ == "__main__":
             light.serve_forever()
         except (KeyboardInterrupt):
             light.shutdown_light()
+        finally:
             light.close()
             sys.exit()
