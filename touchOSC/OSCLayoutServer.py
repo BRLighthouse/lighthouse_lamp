@@ -70,4 +70,7 @@ def doit(filename):
 
 if __name__ == '__main__':
     filename = sys.argv[1] if len(sys.argv) == 2 else 'mainLight.touchosc'
+    if not os.path.exists(filename):
+        print 'Layout file {0} not found, please try again.'
+        sys.exit(1)
     doit(filename)
