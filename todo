@@ -1,17 +1,38 @@
 fixup github access on bb
 setup overlayroot on bb
+  pi has RO mode by using ramdisk and redirecting to /tmp
 
-allow user controls
-must have:
+lamp
+----
+allow user controls:
+  pan speed
+
+admin mode:
   brightness
   speed
   tilt
+  DONE strobe G3: added to play with osc and weird out max 
+
+  override user (tablet?) control
 
 Might add
   direction? Auto-rotate clockwise or counter-clockwise
   shutdown/reboot G3: for the enttec? Or lamp? 
-  DONE strobe G3: added to play with osc and weird out max 
+
+default spinning mode after timeout
+
+stretch goal: web gui thing w/ BRC map
+
+Fire
+----
+
+Forward from lamp osc server to depot osc server
+  so touchOSC doesn't need reconfiguration
+
+Depot will have G3's BB + 1 Arduino Uno that connects to relay board.
+lighthouse_lamp/arduino has the arduino code
 
 
-OSC Server - Reciever
-Do we need a xforwarder again like last year? 
+interior lighting
+-----------------
+stretch goal; dimmer arduino box
