@@ -92,11 +92,11 @@ class PingHandler(threading.Thread):
     def check_pings(self):
         gone_time = 61
         now = time.time()
-        for k, v in self.ping_dict.items():
+        for address, v in self.ping_dict.items():
             delta = now - v
             if delta > gone_time:
                 print "ping - Haven't seen", address, "for", delta, "seconds, removing."
-                del self.ping_dict[k]
+                del self.ping_dict[address]
 
     def add_ping(self, address):
         self.ping_dict[address] = time.time()
