@@ -4,8 +4,12 @@ oscrecv.py
 
 Run an OSCServer to control the lamp from touchOSC.
 """
+# Stdlib
 import platform
 import sys
+import time
+
+# Libraries
 from OSC import OSCServer
 
 # Local libraries
@@ -25,7 +29,6 @@ def avahi_publisher(server):
         service = ZeroconfService(
             name="BRLS TouchOSC Server", port=server.server_address[1], stype="_osc._udp")
         service.publish()
-
 
 class ServerLighthouse(OSCServer):
     """
@@ -72,11 +75,27 @@ class ServerLighthouse(OSCServer):
         address += '/z'
         self.addMsgHandler(address, internal_function)
 
-class Lighthouse_OSC_callbacks(Lighthouse, ServerLighthouse):
+class OSCPingHandler(object):
+    def __init__(self):
+        self.ping_dict = {}
+        self.addMsgHandler('/ping/', self.ping_handler)
 
+    def ping_handler(self, path, tags, args, message_source):
+        """
+            message_source looks like ('192.168.0.24', 47139)
+            The port changes if the touchOSC app is relaunched so just use ip
+        """
+        address, port = message_source
+        self.ping_dict[address] = time.time()
+
+        print self.ping_dict
+
+class Lighthouse_OSC_callbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
     def __init__(self, light_func_dict=None):
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
+        OSCPingHandler.__init__(self)
+
         self.set_functions(light_func_dict)
 
     def set_functions(self, funcDict):
