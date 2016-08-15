@@ -94,7 +94,6 @@ class Lighthouse(object):
         self.dmx.setChannel(CHANNEL_BRIGHTNESS, brightness_percent_to_dmx(self.brightness), autoRender=False)
         self.dmx.render()
 
-
     def set_pan_position(self, position_degrees):
         """
             Moves lamp to a specific position
@@ -143,6 +142,14 @@ class Lighthouse(object):
         """
         self.dmx.setChannel(CHANNEL_STROBE, percent_to_dmx(strobe_percent), autoRender=False)
         self.dmx.render()
+
+    def set_idle(self, ignored):
+        self.set_speed(0)
+        self.set_lamp(95)
+        self.set_strobe(0)
+        self.set_tilt(5)
+        time.sleep(.5)
+        self.set_rotation(True, speed=50)
 
     def shutdown_light(self):
         """

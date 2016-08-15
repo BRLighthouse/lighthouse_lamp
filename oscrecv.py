@@ -49,12 +49,7 @@ class ServerLighthouse(OSC.ThreadingOSCServer):
 
     def am_idle(self):
         print 'Running idle...'
-        self.set_speed(0)
-        self.set_lamp(95)
-        self.set_strobe(0)
-        self.set_tilt(5)
-        time.sleep(.5)
-        self.set_rotation(True, speed=50)
+        self.set_idle(None)
 
     def handle_event(self, address, function, touchFunction=None):
         """
@@ -313,6 +308,7 @@ if __name__ == "__main__":
         '/staticLight/lightControl': 'set_lamp',
         '/staticLight/brightness': 'set_lamp',
         '/staticLight/strobe': 'set_strobe',
+        '/admin/idle_now': 'set_idle',
     }
 
     light = LighthouseOSCCallbacks(lightFunctions)
