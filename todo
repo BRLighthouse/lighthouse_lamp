@@ -5,26 +5,25 @@ setup overlayroot on bb
 lamp
 ----
 allow user controls:
-  pan speed
+  DONE pan speed
 
 admin mode:
-  brightness
-  speed
-  tilt
+  DONE brightness
+  DONE speed
+  DONE tilt
   DONE strobe G3: added to play with osc and weird out max 
 
-  override user (tablet?) control
+  DONE override user (tablet?) control
 
 deadzones
   DONE pan
   DONE tilt
 
-default spinning mode after timeout
+DONE default spinning mode after timeout
 
 Might add
   direction? Auto-rotate clockwise or counter-clockwise
   shutdown/reboot G3: for the enttec? Or lamp? 
-
 
 stretch goal: web gui thing w/ BRC map
 
