@@ -89,6 +89,12 @@ class ClientPingHandler(object):
         self.thread = threading.Thread(target=self.worker)
         self.thread.start()
 
+        class InterceptingRequestHandler(OSC.OSCRequestHandler):
+            def handle(local_self):
+                self.add_ping(local_self.client_address[0])
+                return OSC.OSCRequestHandler.handle(local_self)
+        self.RequestHandlerClass = InterceptingRequestHandler
+
     def worker(self):
         while not self.die:
             self.check_pings()
@@ -120,12 +126,6 @@ class ClientPingHandler(object):
 
 class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler):
     def __init__(self, light_func_dict=None):
-        parent = self
-        class InterceptingRequestHandler(OSC.OSCRequestHandler):
-            def handle(self):
-                parent.add_ping(self.client_address[0])
-                return OSC.OSCRequestHandler.handle(self)
-        self.RequestHandlerClass = InterceptingRequestHandler
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
         ClientPingHandler.__init__(self)
