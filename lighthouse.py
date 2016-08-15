@@ -55,7 +55,7 @@ def reposition_from_pan_deadzone(position_degrees):
             else:
                 return upper_bound + 1
     if position_degrees > PAN_DEAD_ZONES[-1][1]:
-        return True, PAN_DEAD_ZONES[-1][0]-
+        return True, PAN_DEAD_ZONES[-1][0]-1
     return position_degrees
 
 def reposition_from_tilt_deadzone(tilt_degrees):
