@@ -127,6 +127,7 @@ class ClientPingHandler(object):
         """
         address, port = message_source
         self.add_ping(address)
+        self.send_status(address)
 
     def add_ping(self, address):
         self.ping_dict[address] = time.time()
@@ -154,6 +155,7 @@ class IdleChecker(object):
         # running idle pattern.
         time.sleep(IDLE_TIME_BEFORE_AUTOMATIC)
         while not self.die:
+            self.update_clients()
             self.idle_check()
             time.sleep(self.sleep)
 
@@ -180,12 +182,38 @@ class IdleChecker(object):
         self.die = True
         self.thread.join()
 
-class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler, IdleChecker):
+class SendServerStatus(object):
+    def __init__(self):
+        self.client = OSC.OSCClient()
+
+    def send_status(self, client_address):
+        statuses = [
+            ('/admin/idle_enable', int(self.idle_enabled)),
+            ('/staticLight/lightControl', int(self.enabled == client_address)),
+            ]
+        for path, variable in statuses:
+            self.send_message(client_address, path, variable)
+
+    def send_message(self, client_address, path, variable):
+        msg = OSC.OSCMessage(path)
+        msg.append(variable, typehint='f')
+        port = 8000 if client_address != '127.0.0.1' else 4000
+        try:
+            self.client.sendto(msg, (client_address, port))
+        except OSC.OSCClientError:
+            pass
+
+    def update_clients(self):
+        for client in self.ping_dict.iterkeys():
+            self.send_status(client)
+
+class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler, IdleChecker, SendServerStatus):
     def __init__(self, light_func_dict=None):
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
         ClientPingHandler.__init__(self)
         IdleChecker.__init__(self)
+        SendServerStatus.__init__(self)
 
         self.set_functions(light_func_dict)
         self.addMsgHandler('default', self.print_msg)
