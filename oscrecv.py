@@ -126,6 +126,9 @@ class ClientPingHandler(object):
             if delta > gone_time:
                 print "ping - Haven't seen", address, "for", delta, "seconds, removing."
                 del self.ping_dict[address]
+                if self.enabled == address:
+                    self.enabled = None
+                self.send_status(address)
 
     def osc_ping_handler(self, path, tags, args, message_source):
         """
@@ -164,8 +167,8 @@ class IdleChecker(object):
         # running idle pattern.
         time.sleep(IDLE_TIME_BEFORE_AUTOMATIC)
         while not self.die:
-            self.update_clients()
             self.idle_check()
+            self.update_clients()
             time.sleep(self.sleep)
 
     def idle_check(self):
