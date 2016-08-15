@@ -18,9 +18,10 @@ from OSC import OSCServer
 from lighthouse import Lighthouse
 import util
 
-default_recv_port = 8000
 IDLE_TIME_BEFORE_AUTOMATIC = 60 * 3
+TIME_TO_CONSIDER_CLIENT_GONE = 61
 
+default_recv_port = 8000
 
 def avahi_publisher(server):
     # Cribbed from https://github.com/ArdentHeavyIndustries/amcp-rpi/blob/master/server.py
@@ -111,7 +112,7 @@ class ClientPingHandler(object):
             time.sleep(self.sleep)
 
     def check_pings(self):
-        gone_time = 61
+        gone_time = TIME_TO_CONSIDER_CLIENT_GONE
         now = time.time()
         for address, v in self.ping_dict.items():
             delta = now - v
