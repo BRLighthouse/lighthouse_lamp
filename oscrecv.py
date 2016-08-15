@@ -19,6 +19,7 @@ from lighthouse import Lighthouse
 import util
 
 default_recv_port = 8000
+IDLE_TIME_BEFORE_AUTOMATIC = 60 * 3
 
 
 def avahi_publisher(server):
@@ -44,6 +45,15 @@ class ServerLighthouse(OSC.ThreadingOSCServer):
             address = '0.0.0.0'
         OSCServer.__init__(self, (address, recv_port))
         print('Starting OSC Server at %s on port %s' % (address, recv_port))
+
+    def am_idle(self):
+        print 'Running idle...'
+        self.set_speed(0)
+        self.set_lamp(95)
+        self.set_strobe(0)
+        self.set_tilt(5)
+        time.sleep(.5)
+        self.set_rotation(True, speed=50)
 
     def handle_event(self, address, function, touchFunction=None):
         """
@@ -124,11 +134,57 @@ class ClientPingHandler(object):
         self.die = True
         self.thread.join()
 
-class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler):
+class IdleChecker(object):
+    """
+        Send a message to the server every X seconds.
+        Check when the last request from a client was sent.
+        If it was more than Y seconds, run idle command.
+    """
+    def __init__(self):
+        self.die = False
+        self.sleep = 1
+        self.last = time.time()
+        self.thread = threading.Thread(target=self.run)
+        self.thread.start()
+        self.idle = False
+
+    def run(self):
+        # Wait for IDLE_TIME_BEFORE_AUTOMATIC seconds after startup before
+        # running idle pattern.
+        time.sleep(IDLE_TIME_BEFORE_AUTOMATIC)
+        while not self.die:
+            self.idle_check()
+            time.sleep(self.sleep)
+
+    def idle_check(self):
+        # check when last req from client was sent
+        now = time.time()
+        client = None
+        for client, timestamp in self.ping_dict.iteritems():
+            if (now - timestamp) <= IDLE_TIME_BEFORE_AUTOMATIC:
+                self.idle = False
+                break
+        else:
+            # fires if break not run, so only when idle
+            if not self.idle:
+                self.idle = True
+                self.am_idle()
+            return
+
+        # break was hit - system still being used.
+        print 'System still being used by', client
+        pass
+
+    def close(self):
+        self.die = True
+        self.thread.join()
+
+class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler, IdleChecker):
     def __init__(self, light_func_dict=None):
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
         ClientPingHandler.__init__(self)
+        IdleChecker.__init__(self)
 
         self.set_functions(light_func_dict)
         self.addMsgHandler('default', self.print_msg)
@@ -147,6 +203,7 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler):
     def close(self):
         ServerLighthouse.close(self)
         ClientPingHandler.close(self)
+        IdleChecker.close(self)
 
     def request_control(self, path, data_types, raw_data, sender_port_tuple):
         sender = sender_port_tuple[0]
