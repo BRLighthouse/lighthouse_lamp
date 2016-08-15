@@ -156,7 +156,7 @@ class IdleChecker(object):
         self.die = False
         self.sleep = 1
         self.idle = False
-        self.idle_enabled = True
+        self.idle_enabled = 1
         self.last = time.time()
         self.addMsgHandler('/admin/idle_enable', self.idle_toggle)
         self.thread = threading.Thread(target=self.run)
