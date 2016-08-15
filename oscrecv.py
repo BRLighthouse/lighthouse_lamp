@@ -145,10 +145,12 @@ class IdleChecker(object):
     def __init__(self):
         self.die = False
         self.sleep = 1
+        self.idle = False
+        self.idle_enabled = True
         self.last = time.time()
+        self.addMsgHandler('/admin/idle_enable', self.idle_toggle)
         self.thread = threading.Thread(target=self.run)
         self.thread.start()
-        self.idle = False
 
     def run(self):
         # Wait for IDLE_TIME_BEFORE_AUTOMATIC seconds after startup before
@@ -169,14 +171,22 @@ class IdleChecker(object):
                 break
         else:
             # fires if break not run, so only when idle
+            self.enabled = None # system is idle, no one has control
             if not self.idle:
                 self.idle = True
-                self.am_idle()
+                if self.idle_enabled:
+                # idle animation is disabled via touchosc admin page
+                    self.am_idle()
             return
 
         # break was hit - system still being used.
-        print 'System still being used by', client
+        print 'System still being used by', self.ping_dict.keys()
         pass
+
+    def idle_toggle(self, path, data_types, raw_data, sender_port_tuple):
+        data = int(raw_data[0])
+        self.idle_enabled = data
+        self.send_status(sender_port_tuple[0])
 
     def close(self):
         self.die = True
