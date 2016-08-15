@@ -77,15 +77,19 @@ class ServerLighthouse(OSC.ThreadingOSCServer):
         address += '/z'
         self.addMsgHandler(address, internal_function)
 
-class PingHandler(threading.Thread):
-
+class PingHandler(object):
+    """
+        Listen for /ping/ messages and update last seen timestamps
+    """
     def __init__(self):
-        threading.Thread.__init__(self)
         self.ping_dict = {}
         self.die = False
         self.sleep = 1
+        self.addMsgHandler('/ping/', self.osc_ping_handler)
+        self.thread = threading.Thread(target=self.worker)
+        self.thread.start()
 
-    def run(self):
+    def worker(self):
         while not self.die:
             self.check_pings()
             time.sleep(self.sleep)
@@ -99,20 +103,6 @@ class PingHandler(threading.Thread):
                 print "ping - Haven't seen", address, "for", delta, "seconds, removing."
                 del self.ping_dict[address]
 
-    def add_ping(self, address):
-        self.ping_dict[address] = time.time()
-
-class OSCPingHandler(object):
-    def __init__(self):
-        self.addMsgHandler('/ping/', self.osc_ping_handler)
-        self.addMsgHandler('/dynamicLight/xy1', self.osc_ping_handler)
-
-        self.pings = PingHandler()
-        self.pings.start()
-
-    def add_ping(self, address):
-        self.pings.add_ping(address)
-
     def osc_ping_handler(self, path, tags, args, message_source):
         """
             message_source looks like ('192.168.0.24', 47139)
@@ -121,11 +111,14 @@ class OSCPingHandler(object):
         address, port = message_source
         self.add_ping(address)
 
-    def close(self):
-        self.pings.die = True
-        self.pings.join()
+    def add_ping(self, address):
+        self.ping_dict[address] = time.time()
 
-class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
+    def close(self):
+        self.die = True
+        self.thread.join()
+
+class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, PingHandler):
     def __init__(self, light_func_dict=None):
         parent = self
         class InterceptingRequestHandler(OSC.OSCRequestHandler):
@@ -135,7 +128,7 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
         self.RequestHandlerClass = InterceptingRequestHandler
         ServerLighthouse.__init__(self)
         Lighthouse.__init__(self)
-        OSCPingHandler.__init__(self)
+        PingHandler.__init__(self)
 
         self.set_functions(light_func_dict)
         self.addMsgHandler('default', self.print_msg)
@@ -153,7 +146,7 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, OSCPingHandler):
 
     def close(self):
         ServerLighthouse.close(self)
-        OSCPingHandler.close(self)
+        PingHandler.close(self)
 
     def request_control(self, path, data_types, raw_data, sender_port_tuple):
         sender = sender_port_tuple[0]
