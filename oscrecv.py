@@ -238,6 +238,7 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler, Id
         self.set_functions(light_func_dict)
         self.addMsgHandler('default', self.print_msg)
         self.addMsgHandler('/staticLight/lightControl', self.request_control)
+        self.addMsgHandler('/admin/take_control', self.take_control)
 
         self.enabled = None
 
@@ -297,6 +298,11 @@ class LighthouseOSCCallbacks(Lighthouse, ServerLighthouse, ClientPingHandler, Id
         client.connect((sender, return_port))
         client.send(msg)
         client.close()
+
+    def take_control(self, path, data_types, raw_data, sender_port_tuple):
+        sender = sender_port_tuple[0]
+        self.enabled = sender
+        self.update_clients()
 
 if __name__ == "__main__":
 
