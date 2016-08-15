@@ -66,7 +66,10 @@ class ServerLighthouse(OSC.ThreadingOSCServer):
         """
         def internal_function(path, tags, args, source):
             args = [int(arg) for arg in args]
-            function(*args)
+            if source[0] == self.enabled:
+                function(*args)
+            else:
+                print 'Ignoring command from', source[0], 'because', self.enabled, 'has control.'
 
         self.addMsgHandler(address, internal_function)
         self.handle_touch(address, touchFunction)
