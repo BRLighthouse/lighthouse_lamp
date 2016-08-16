@@ -33,6 +33,12 @@ Fire
 Forward from lamp osc server to depot osc server
   so touchOSC doesn't need reconfiguration
 
+OSC fire control page/layout
+
+4 sets of 3 buttons
+slider for time delay till poof
+duration of poof
+
 Depot will have G3's BB + 1 Arduino Uno that connects to relay board.
 lighthouse_lamp/arduino has the arduino code
 
