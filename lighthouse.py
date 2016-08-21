@@ -97,8 +97,11 @@ class Lighthouse(object):
     def set_pan_position(self, position_degrees):
         """
             Moves lamp to a specific position
-            TODO - Add in don't-burn-down-lighthouse safeguard
         """
+        # Disable rotation
+        # TODO - determine magic value that must be sent to stop rotating
+        self.dmx.setChannel(CHANNEL_PAN_MOVMENT, 0, autoRender=False)
+
         position_degrees = reposition_from_pan_deadzone(position_degrees)
         self.dmx.setChannel(CHANNEL_PAN_LOCATION, degrees_to_dmx(position_degrees), autoRender=False)
         self.dmx.render()
