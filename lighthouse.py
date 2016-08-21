@@ -76,8 +76,8 @@ class Lighthouse(object):
         # self.dmx.setDebug('SerialBuffer', True)
         self.dmx.setChannel(CHANNEL_MASTER_CONTROL, MASTER_LAMP_OFF, autoRender=False)
         self.dmx.setChannel(CHANNEL_PAN_LOCATION, degrees_to_dmx(180), autoRender=False)  # pan location
-        self.dmx.setChannel(CHANNEL_TILT, TILT_VERTICAL, autoRender=False)  # tilt
-        self.set_speed(25)
+        self.dmx.setChannel(CHANNEL_TILT, tilt_to_dmx(0), autoRender=False)  # tilt to 0 degrees (horizontal)
+        self.dmx.setChannel(CHANNEL_SPEED, percent_to_dmx(25), autoRender=False) # set speed
         self.dmx.render()
 
     def set_lamp(self, int_brightness):
